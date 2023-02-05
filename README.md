@@ -2,7 +2,9 @@
 
 1. install the requirements.txt `pip install -r requirements.txt`
 
-2. run on local `streamlit run streamlit_app.py`
+2. download pretrained models from https://drive.google.com/uc?id=1E7edgJ83wuLrTRMO7HWd1zL_Z-e2_Zsq and put it in folder `pretrained models`
+
+3. run on local `streamlit run streamlit_app.py`
 
    deploy on web:
    1) run on port 80 (it can be any port): `streamlit run streamlit_app.py --server.port 80`
