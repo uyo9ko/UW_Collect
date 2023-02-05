@@ -2,7 +2,7 @@
 
 1. install the requirements.txt `pip install -r requirements.txt`
 
-2. download pretrained models from https://drive.google.com/uc?id=1E7edgJ83wuLrTRMO7HWd1zL_Z-e2_Zsq and put it in folder `pretrained models`
+2. download pretrained models follow urls in `pretrained_models/download.txt` and put it in folder `pretrained_models`
 
 3. run on local `streamlit run streamlit_app.py`
 
