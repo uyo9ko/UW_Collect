@@ -11,7 +11,7 @@ import gdown
 
 def enhance_my(image):
     my_model = MainModel()
-    if not os.path.exists('UE_code/model.pt'):
+    if not os.path.exists('pretrained_models/My_model.pt'):
         # url = 'https://drive.google.com/uc?id=1E7edgJ83wuLrTRMO7HWd1zL_Z-e2_Zsq'
         # filename = 'UE_code/model.pt'
         # gdown.download(url, filename, quiet=True)
@@ -26,10 +26,12 @@ def enhance_my(image):
 
     my_model.load_state_dict( model_weights)
     my_model.eval()
-
+    #new w h can be devide by 32
+    w = image.size[0]-image.size[0]%32
+    h = image.size[1]-image.size[1]%32
     # load your pre-trained model
     transform = A.Compose(
-                    transforms=[A.Resize(448, 608), ToTensorV2()],
+                    transforms=[A.Resize(h,w), ToTensorV2()],
                 )
 
     # convert image to numpy array
