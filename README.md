@@ -2,7 +2,7 @@
 
 1. install the requirements.txt `pip install -r requirements.txt`
 
-2. download pretrained models follow urls in `pretrained_models/download.txt` and put it in folder `pretrained_models`
+2. download pretrained models follow urls in `https://drive.google.com/drive/folders/1c7xVgEsXlqqUOD6EDUBNY9ZUdtg7bpB3?usp=share_link` and put it in folder `pretrained_models`
 
 3. run on local `streamlit run Underwater_Single_Image_Enhancer.py`
 
