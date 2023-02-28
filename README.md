@@ -1,4 +1,4 @@
-# Underwater enhancement methods Collect
+# Underwater Enhancement Methods Collect
 
 1. install the requirements.txt `pip install -r requirements.txt`
 
