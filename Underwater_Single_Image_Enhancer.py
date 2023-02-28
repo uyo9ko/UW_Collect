@@ -6,7 +6,25 @@ import time
 import base64
 from pathlib import Path
 from nevaluate import nmetrics
+import base64
 
+@st.cache(allow_output_mutation=True)
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def set_background(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    page_bg_img = '''
+    <style>
+    .stApp {
+    background-image: url("data:image/png;base64,%s");
+    background-size: cover;
+    }
+    </style>
+    ''' % bin_str
+    st.markdown(page_bg_img, unsafe_allow_html=True)
 
 def resize_image(image, max_size):
     width, height = image.size
@@ -59,6 +77,7 @@ def enhance_image_udcp(image):
 
 
 st.set_page_config(page_title="Underwater Single Image Enhancer", page_icon="🤔", layout="wide")
+# set_background('background.png')
 # st.sidebar.header("Underwater Single Image Enhancer")
 empty_image = Image.open('camera_1.png')
 MAX_SIZE = 500
@@ -151,14 +170,14 @@ if "enhanced_image" in st.session_state:
         st.write(f"Enhance time: {st.session_state['enhance_time']:.2f} seconds")
         st.session_state["enhanced_image"].save('enhance_img.png')
 
-with col2:
-    with open("enhance_img.png", "rb") as the_file:
-        btn = st.download_button(
-                label="Download image",
-                data=the_file,
-                file_name="enhance_img.png",
-                mime="image/png"
-            )
+    with col2:
+        with open("enhance_img.png", "rb") as the_file:
+            btn = st.download_button(
+                    label="Download image",
+                    data=the_file,
+                    file_name="enhance_img.png",
+                    mime="image/png"
+                )
 
 
 
