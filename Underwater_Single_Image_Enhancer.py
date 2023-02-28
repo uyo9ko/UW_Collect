@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image,ImageOps
 import numpy as np
 import os
-from UE_code.enhance import enhance_my
 import time
 import base64
 from pathlib import Path
@@ -29,10 +28,33 @@ def cal_metrics(image):
 
 
 @st.cache
-def enhance_image(image):
-    enhanced_image = enhance_my(image)
+def enhance_image_my(image):
+    my_model = MyModel()
+    enhanced_image = my_model.enhance(image)
     uiqm_2, uciqe_2 = nmetrics(np.array(enhanced_image))
     return enhanced_image, uiqm_2, uciqe_2
+
+@st.cache
+def enhance_image_funie(image):
+    funiegan = FunieGAN()
+    enhanced_image = funiegan.enhance(image)
+    uiqm_2, uciqe_2 = nmetrics(np.array(enhanced_image))
+    return enhanced_image, uiqm_2, uciqe_2
+
+@st.cache
+def enhance_image_ursct(image):
+    ursct_sesr= URSCT_SESR()
+    enhanced_image = ursct_sesr.enhance(image)
+    uiqm_2, uciqe_2 = nmetrics(np.array(enhanced_image))
+    return enhanced_image, uiqm_2, uciqe_2
+
+@st.cache
+def enhance_image_udcp(image):
+    udcp= UDCP()
+    enhanced_image = udcp.enhance(image)
+    uiqm_2, uciqe_2 = nmetrics(np.array(enhanced_image))
+    return enhanced_image, uiqm_2, uciqe_2
+
 
 
 
@@ -46,7 +68,8 @@ left,middle,right = st.columns([1,4,1])
 with middle:
     st.title("Underwater Single Image Enhancer")
     # Define the options for the selection bar
-    options = ['MyModel', 'UDCP', 'GCDP', 'UWCNN','Ucolor']
+    # options = ['MyModel', 'UDCP', 'GCDP', 'UWCNN','Ucolor']
+    options = ['UDCP', 'FunieGAN','URSCT_SESR','MyModel']
     # Create a imgfile uploader widget
     imgfile = st.file_uploader("Upload an image file", type=["jpg", "jpeg", "png"])
 
@@ -89,13 +112,27 @@ if imgfile is not None:
             uiqm_1, uciqe_1 = cal_metrics(image)
             placeholder_uiqm_1.metric("UIQM", f"{uiqm_1:.2f}")
             placeholder_uciqe_1.metric("UCIQE", f"{uciqe_1:.2f}")
+            st.session_state["uiqm_1"] = uiqm_1
+            st.session_state["uciqe_1"] = uciqe_1
 
 
 if sb:
     with col2:
         if image :
             start_time = time.time()
-            enhanced_image, uiqm_2, uciqe_2 = enhance_image(image)
+            if selected_option == 'MyModel':
+                from UE_code.enhance import MyModel
+                enhanced_image, uiqm_2, uciqe_2 = enhance_image_my(image)
+            elif selected_option == 'FunieGAN':
+                from Funie_GAN_code.enhance import FunieGAN
+                enhanced_image, uiqm_2, uciqe_2 = enhance_image_funie(image)
+            elif selected_option == 'URSCT_SESR':
+                from URSCT_SESR_code.enhance import URSCT_SESR
+                enhanced_image, uiqm_2, uciqe_2 = enhance_image_ursct(image)
+            elif selected_option == 'UDCP':
+                from UDCP_code.enhance import UDCP
+                enhanced_image, uiqm_2, uciqe_2 = enhance_image_udcp(image)    
+
             end_time = time.time()
             st.session_state["enhanced_image"] = enhanced_image
             st.session_state["uiqm_2"] = uiqm_2
@@ -108,8 +145,8 @@ if "enhanced_image" in st.session_state:
     with col2:
         resized_enhanced_image = resize_image(st.session_state["enhanced_image"], MAX_SIZE)
         placeholder_2.image(resized_enhanced_image, caption="Enhanced Image", use_column_width=True)
-        placeholder_uiqm_2.metric("UIQM", f"{st.session_state['uiqm_2']:.2f}", f"{st.session_state['uiqm_2']-uiqm_1:.2f}")
-        placeholder_uciqe_2.metric("UCIQE", f"{st.session_state['uciqe_2']:.2f}", f"{st.session_state['uciqe_2']-uciqe_1:.2f}")
+        placeholder_uiqm_2.metric("UIQM", f"{st.session_state['uiqm_2']:.2f}", f"{st.session_state['uiqm_2']- st.session_state['uiqm_1']:.2f}")
+        placeholder_uciqe_2.metric("UCIQE", f"{st.session_state['uciqe_2']:.2f}", f"{st.session_state['uciqe_2']- st.session_state['uciqe_1']:.2f}")
         st.success("Image enhanced successfully")
         st.write(f"Enhance time: {st.session_state['enhance_time']:.2f} seconds")
         st.session_state["enhanced_image"].save('enhance_img.png')

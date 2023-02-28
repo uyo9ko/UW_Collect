@@ -2,7 +2,8 @@ import streamlit as st
 from PIL import Image,ImageOps
 import numpy as np
 import os
-from UE_code.enhance import enhance_my
+
+
 import time
 import base64
 from pathlib import Path
@@ -37,7 +38,6 @@ def cal_metrics(files, df_input, name2file):
 
 
 
-
 st.set_page_config(page_title="Underwater Batch Image Enhancer", page_icon="🤖️", layout ='wide')
 # st.sidebar.header("Underwater Batch Image Enhancer")
 
@@ -45,7 +45,7 @@ left,middle,right = st.columns([1,4,1])
 with middle:
     st.title("Underwater Batch Image Enhancer")
     # Define the options for the selection bar
-    options = ['MyModel', 'UDCP', 'GCDP', 'UWCNN','Ucolor']
+    options = ['UDCP', 'FunieGAN','URSCT_SESR','MyModel']
     # Create a file uploader widget
     files = st.file_uploader("Upload an image file", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
@@ -91,10 +91,23 @@ if sumbit_button:
             df_output = pd.DataFrame(columns=['Image Name', 'UIQM', 'UCIQE'])
             work_list = df_input['Image Name'].tolist()
             progress_bar = st.progress(0)
+            if selected_option == 'MyModel':
+                from UE_code.enhance import MyModel
+                enhance_model = MyModel()
+            elif selected_option == 'FunieGAN':
+                from Funie_GAN_code.enhance import FunieGAN
+                enhance_model = FunieGAN()
+            elif selected_option == 'URSCT_SESR':
+                from URSCT_SESR_code.enhance import URSCT_SESR
+                enhance_model = URSCT_SESR()
+            elif selected_option == 'UDCP':
+                from UDCP_code.enhance import UDCP
+                enhance_model = UDCP()
+
             for idx, img_name in enumerate(work_list):
                 progress_bar.progress((idx+1)/len(work_list))
                 image = Image.open(name2file[img_name])
-                enhanced_image = enhance_my(image)
+                enhanced_image = enhance_model.enhance(image)
                 enhanced_image.save(os.path.join('batch_results', img_name))
                 uiqm, uciqe = nmetrics(np.array(enhanced_image))
                 df_output.loc[-1]= [img_name, uiqm, uciqe]
@@ -104,6 +117,8 @@ if sumbit_button:
             end_time = time.time()
             st.session_state['df_output'] = df_output
             st.success("ALL images enhanced successfully")
+            st.write('average uiqm', df_output['UIQM'].mean())
+            st.write('average uciqe', df_output['UCIQE'].mean())
             st.write("Time taken for processing: ", end_time - start_time, "seconds")
         else:
             st.warning("Please upload images to see the enhanced version")
